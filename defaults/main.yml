@@ -182,8 +182,7 @@ ubuntu1604cis_host_allow:
     - "192.168.0.0/255.255.0.0"
     - "0.0.0.0/0.0.0.0"
 
-ubuntu1604cis_firewall: firewalld
-#ubuntu1604cis_firewall: iptables
+ubuntu1604cis_firewall: iptables
 
 ubuntu1604cis_firewall_services:
     - ssh
@@ -250,4 +249,4 @@ chrony_config_file:
 
 ###firewall
 
-ubuntu1604cis_setup_firewall: false
+ubuntu1604cis_setup_firewall: true

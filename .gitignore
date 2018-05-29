@@ -12,7 +12,6 @@ tests/*.retry
 .Python
 .molecule/
 bin/
-etc/
 include/
 lib/
 pip-selfcheck.json

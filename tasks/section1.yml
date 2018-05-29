@@ -88,6 +88,36 @@
       - rule_1.1.1.6
       - udf
 
+- name: "SCORED | 1.1.1.6-dil | PATCH | Ensure mounting of squashfs filesystems is disabled"
+  lineinfile:
+      dest: /etc/modprobe.d/CIS.conf
+      regexp: "^(#)?install squashfs(\\s|$)"
+      line: "install squashfs /bin/true"
+      create: yes
+  when:
+      - ubuntu1604cis_rule_1_1_1_7
+  tags:
+      - level1
+      - scored
+      - patch
+      - rule_1.1.1.6.dil
+      - squashfs
+
+- name: "SCORED | 1.1.1.8-dil | PATCH | Ensure mounting of vfat filesystems is disabled"
+  lineinfile:
+      dest: /etc/modprobe.d/CIS.conf
+      regexp: "^(#)?install vfat(\\s|$)"
+      line: "install vfat /bin/true"
+      create: yes
+  when:
+      - ubuntu1604cis_rule_1_1_1_7
+  tags:
+      - level1
+      - scored
+      - patch
+      - rule_1.1.1.8.dil
+      - vfat
+
 - name: "SCORED | 1.1.2 | PATCH | Ensure separate partition exists for /tmp | enable and start/restart tmp.mount"
   copy:
     src: "{{ tmp_mount_file[ansible_os_family] }}"
@@ -145,7 +175,7 @@
       - rule_1.1.4
 
 - name: "SCORED | 1.1.5 | PATCH | Ensure separate partition exists for /var"
-  shell: mount | grep "on /var "
+  shell: mount | grep "/var"
   register: var_mounted
   changed_when: no
   failed_when: no
@@ -156,10 +186,9 @@
       - scored
       - patch
       - rule_1.1.5
-      - notimplemented
 
 - name: "SCORED | 1.1.6 | PATCH | Ensure separate partition exists for /var/tmp"
-  shell: mount | grep "on /var/tmp "
+  shell: mount | grep "/var/tmp "
   register: var_tmp_mounted
   changed_when: no
   failed_when: no
@@ -170,7 +199,6 @@
       - scored
       - patch
       - rule_1.1.6
-      - notimplemented
 
 - name: "SCORED | 1.1.7  | PATCH | Ensure nodev option set on /var/tmp partition\n
          SCORED | 1.1.8  | PATCH | Ensure nosuid option set on /var/tmp partition\n
@@ -195,7 +223,7 @@
       - rule_1.1.9
 
 - name: "SCORED | 1.1.10 | PATCH | Ensure separate partition exists for /var/log"
-  shell: mount | grep "on /var/log "
+  shell: mount | grep "/var/log"
   register: var_log_mounted
   changed_when: no
   failed_when: no
@@ -208,7 +236,7 @@
       - rule_1.1.10
 
 - name: "SCORED | 1.1.11 | PATCH | Ensure separate partition exists for /var/log/audit"
-  shell: mount | grep "on /var/log/audit "
+  shell: mount | grep "/var/log/audit"
   register: var_log_audit_mounted
   changed_when: no
   failed_when: no
@@ -221,7 +249,7 @@
       - rule_1.1.11
 
 - name: "SCORED | 1.1.12 | PATCH | Ensure separate partition exists for /home"
-  shell: mount | grep "on /home "
+  shell: mount | grep "/home"
   register: home_mounted
   changed_when: no
   failed_when: no
@@ -234,7 +262,13 @@
       - rule_1.1.12
 
 - name: "SCORED | 1.1.13 | PATCH | Ensure nodev option set on /home partition"
-  command: /bin/true
+    # mount:
+    #   name: /home
+    #   src: /dev/somedrive
+    #   state: mounted
+    #   fstype: ext4
+    #   opts: "rw,relatime,discard,data=ordered,nodev"
+  shell: mount | grep "/home" | grep "nodev"
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_1_13
@@ -243,7 +277,6 @@
       - level2
       - patch
       - rule_1.1.13
-      - notimplemented
 
 - name: "SCORED | 1.1.14 | PATCH | Ensure nodev option set on /dev/shm partition\n
          SCORED | 1.1.15 | PATCH | Ensure nosuid option set on /dev/shm partition\n
@@ -276,7 +309,6 @@
       - notscored
       - patch
       - rule_1.1.18
-      - notimplemented
 
 - name: "NOTSCORED | 1.1.18 | PATCH | Ensure nosuid option set on removable media partitions"
   command: /bin/true
@@ -288,7 +320,6 @@
       - notscored
       - patch
       - rule_1.1.18
-      - notimplemented
 
 - name: "NOTSCORED | 1.1.19 | PATCH | Ensure noexec option set on removable media partitions"
   command: /bin/true
@@ -300,7 +331,6 @@
       - notscored
       - patch
       - rule_1.1.19
-      - notimplemented
 
 - name: "SCORED | 1.1.20 | PATCH | Ensure sticky bit is set on all world-writable directories"
   shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 2>/dev/null | xargs chmod a+t
@@ -328,7 +358,7 @@
       - rule_1.1.21
 
 - name: "NOTSCORED | 1.2.1 | PATCH | Ensure package manager repositories are configured"
-  command: /bin/true
+  command: apt-cache policy
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_2_1
@@ -337,11 +367,10 @@
       - notscored
       - patch
       - rule_1.2.1
-      - notimplemented
 
 
 - name: "NOTSCORED | 1.2.3 | PATCH | Ensure GPG keys are configured"
-  command: /bin/true
+  command: apt-key list
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_2_3
@@ -350,7 +379,6 @@
       - notscored
       - patch
       - rule_1.2.3
-      - notimplemented
 
 - name: "SCORED | 1.3.1 | PATCH | Ensure AIDE is installed"
   apt:
@@ -432,10 +460,13 @@
       - grub
       - patch
       - rule_1.4.2
-      - notimplemented
 
 - name: "NOTSCORED | 1.4.3 | PATCH | Ensure authentication required for single user mode"
-  command: /bin/true
+  lineinfile:
+    dest: /etc/inittab
+    regexp: '^~~:S:respawn:\/sbin\/sulogin'
+    line: "~~:S:respawn:/sbin/sulogin"
+    create: yes
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_4_3
@@ -444,7 +475,21 @@
       - level2
       - patch
       - rule_1.4.3
-      - notimplemented
+
+- name: "NOTSCORED | 1.4.3 | PATCH | Ensure authentication required for single user mode"
+  lineinfile:
+    dest: /etc/sysconfig/init
+    regexp: '^SINGLE=\/sbin\/sulogin$'
+    line: "SINGLE=/sbin/sulogin"
+    create: yes
+  changed_when: no
+  when:
+      - ubuntu1604cis_rule_1_4_3
+  tags:
+      - level1
+      - level2
+      - patch
+      - rule_1.4.3
 
 - name: "SCORED | 1.5.1 | PATCH | Ensure core dumps are restricted"
   lineinfile:
@@ -489,7 +534,6 @@
       - level2
       - patch
       - rule_1.5.2
-      - notimplemented
 
 - name: "SCORED | 1.5.3 | PATCH | Ensure address space layout randomization (ASLR) is enabled"
   sysctl:
@@ -549,23 +593,24 @@
 
 - name: "SCORED | 1.6.1.2 | PATCH | Ensure the SELinux state is enforcing"
   command: /bin/true
+  #shell: grep SELINUX=enforcing /etc/selinux/config
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_6_1_2
   tags:
-      - level1
+      - level2
       - notscored
       - patch
       - rule_1.6.1.2
-      - notimplemented
 
 - name: "SCORED | 1.6.1.3 | PATCH | Ensure SELinux policy is configured"
   command: /bin/true
+  #shell: grep SELINUXTYPE=targeted /etc/selinux/config
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_6_1_3
   tags:
-      - level1
+      - level2
       - notscored
       - patc3
       - rule_1.6.1.2
@@ -584,7 +629,7 @@
       - notimplemented
 
 - name: "SCORED | 1.6.2.1 | PATCH | Ensure AppArmor is not disabled in bootloader configuration"
-  command: /bin/true
+  command: grep "^\s*kernel" /boot/grub/menu.lst | grep -v "apparmor=0"
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_6_2_1
@@ -593,32 +638,30 @@
       - notscored
       - patch
       - rule_1.6.2.1
-      - notimplemented
 
 - name: "SCORED | 1.6.2.2 | PATCH | Ensure all AppArmor Profiles are enforcing"
   command: /bin/true
+  #shell: apparmor_status | grep "[0-9] profiles are in enforce mode"
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_6_2_2
   tags:
-      - level1
+      - level2
       - notscored
       - patch
       - rule_1.6.2.2
-      - notimplemented
 
 - name: "SCORED | 1.6.3 | PATCH | Ensure SELinux or AppArmor are installed"
   command: /bin/true
+  #shell: dpkg -s libselinux1 && dpkg -s apparmor
   changed_when: no
   when:
       - ubuntu1604cis_rule_1_6_3
   tags:
-      - level1
+      - level2
       - notscored
       - patch
       - rule_1.6.3
-      - notimplemented
-
 
 - name: "SCORED | 1.7.1.1 | PATCH | Ensure message of the day is configured properly"
   template:

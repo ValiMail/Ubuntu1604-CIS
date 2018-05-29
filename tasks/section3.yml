@@ -357,17 +357,6 @@
       - patch
       - rule_3.6.1
 
-- name: "SCORED | 3.6.1 | PATCH | Ensure iptables is installed and started"
-  service:
-      name: iptables
-      state: started
-      enabled: yes
-  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
-  tags:
-      - level1
-      - patch
-      - rule_3.6.1
-
 - name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
   lineinfile:
       dest: /etc/firewalld/firewalld.conf
@@ -391,34 +380,160 @@
       - rule_3.6.2
 
 - name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
-  command: /bin/true
+  # Set the policy for the INPUT chain to DROP
+  iptables:
+    chain: INPUT
+    policy: DROP
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
       - level1
       - patch
       - rule_3.6.2
-      - notimplemented
+
+- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
+  # Set the policy for the OUTPUT chain to DROP
+  iptables:
+    chain: OUTPUT
+    policy: DROP
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.2
+
+- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
+  # Set the policy for the FORWARD chain to DROP
+  iptables:
+    chain: FORWARD
+    policy: DROP
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.2
 
 - name: "SCORED | 3.6.3 | PATCH | Ensure loopback traffic is configured"
-  command: /bin/true
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
       - level1
       - patch
       - rule_3.6.3
-      - notimplemented
 
-- name: "NOTSCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
-  command: /bin/true
+- name: "SCORED | 3.6.3 | PATCH | Ensure loopback traffic is configured"
+  iptables:
+    chain: OUTPUT
+    out_interface: lo
+    jump: ACCEPT
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.3
+
+- name: "SCORED | 3.6.3 | PATCH | Ensure loopback traffic is configured"
+  iptables:
+    chain: INPUT
+    source: 127.0.0.0/8
+    jump: DROP
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.3
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    match: state
+    state: NEW,ESTABLISHED
+    jump: ACCEPT
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
       - level1
       - patch
       - rule_3.6.4
-      - notimplemented
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: OUTPUT
+    protocol: udp
+    match: state
+    state: NEW,ESTABLISHED
+    jump: ACCEPT
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: OUTPUT
+    protocol: icmp
+    match: state
+    state: NEW,ESTABLISHED
+    jump: ACCEPT
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    match: state
+    state: ESTABLISHED
+    jump: ACCEPT
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: OUTPUT
+    protocol: udp
+    match: state
+    state: ESTABLISHED
+    jump: ACCEPT
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: OUTPUT
+    protocol: icmp
+    match: state
+    state: ESTABLISHED
+    jump: ACCEPT
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
 
 - name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
   firewalld:
@@ -436,7 +551,13 @@
       - rule_3.6.5
 
 - name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
-  command: /bin/true
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 22
+    match: state
+    state: NEW
+    jump: ACCEPT
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -453,3 +574,92 @@
       - level2
       - patch
       - rule_3.7
+
+- name: 3.0 Check for /boot/grub/grub.cfg file (Not Scored)
+  stat: path=/boot/grub/grub.cfg
+  register: grub_cfg_file
+  tags:
+    - section3
+
+- name: 3.3.1.1 Set Boot Loader Superuser (check) (Scored)
+  command: grep "^set superusers" /boot/grub/grub.cfg
+  register: boot_superusers
+  when: grub_cfg_file.stat.exists == True
+  changed_when: False
+  failed_when: False
+  always_run: True
+  tags:
+    - section3
+    - section3.3
+    - section3.3.1
+    - section3.3.1.1
+
+- name: 3.3.1.2 Set Boot Loader Superuser (Scored)
+  lineinfile: >
+    dest='/etc/grub.d/40_custom'
+    regexp='^set superusers'
+    line='set superusers="root"'
+    state=present
+    create=yes
+  when: grub_cfg_file.stat.exists == True and boot_superusers.rc == 1
+  tags:
+    - section3
+    - section3.3
+    - section3.3.1
+    - section3.3.1.2
+
+- name: 3.3.2.1 Set Boot Loader Password (check) (Scored)
+  command: grep "^password" /boot/grub/grub.cfg
+  register: boot_password
+  when: grub_cfg_file.stat.exists == True
+  changed_when: False
+  failed_when: False
+  always_run: True
+  tags:
+    - section3
+    - section3.3
+    - section3.3.2
+    - section3.3.2.1
+
+- name: 3.3.2.2 Set Boot Loader Password (Scored)
+  lineinfile: >
+    dest='/etc/grub.d/40_custom'
+    regexp='^password'
+    line="password_pbkdf2 root {{ grub_pass }}"
+    state=present
+  when: grub_cfg_file.stat.exists == True and boot_password.rc == 1
+  tags:
+    - section3
+    - section3.3
+    - section3.3.2
+    - section3.3.2.2
+
+- name: 3.3.3 Disable password protection booting (Scored)
+  lineinfile: >
+    dest='/etc/grub.d/10_linux'
+    create=yes
+    regexp='^CLASS='
+    line='CLASS="--class gnu-linux --class gnu --class os --unrestricted"'
+    state=present
+  tags:
+    - section3
+    - section3.3
+    - section3.3.3
+
+- name: 3.3.3 Disable IPV6 in grub (Scored)
+  replace:
+    dest='/etc/default/grub'
+    regexp='^GRUB_CMDLINE_LINUX=(.*)$'
+    replace='GRUB_CMDLINE_LINUX="ipv6.disable=1"'
+  tags:
+    - section3
+    - section3.3
+    - section3.3.3
+
+- name: 3.3.4 Update Grub configuration (Scored)
+  command: update-grub
+  when: grub_cfg_file.stat.exists == True and (boot_superusers.rc == 1 or boot_password.rc == 1)
+  tags:
+    - section3
+    - section3.3
+    - section3.3.4
