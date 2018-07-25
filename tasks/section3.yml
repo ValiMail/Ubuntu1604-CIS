@@ -379,42 +379,6 @@
       - patch
       - rule_3.6.2
 
-- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
-  # Set the policy for the INPUT chain to DROP
-  iptables:
-    chain: INPUT
-    policy: DROP
-  changed_when: no
-  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
-  tags:
-      - level1
-      - patch
-      - rule_3.6.2
-
-- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
-  # Set the policy for the OUTPUT chain to DROP
-  iptables:
-    chain: OUTPUT
-    policy: DROP
-  changed_when: no
-  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
-  tags:
-      - level1
-      - patch
-      - rule_3.6.2
-
-- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
-  # Set the policy for the FORWARD chain to DROP
-  iptables:
-    chain: FORWARD
-    policy: DROP
-  changed_when: no
-  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
-  tags:
-      - level1
-      - patch
-      - rule_3.6.2
-
 - name: "SCORED | 3.6.3 | PATCH | Ensure loopback traffic is configured"
   iptables:
     chain: INPUT
@@ -456,8 +420,9 @@
     chain: OUTPUT
     protocol: tcp
     match: state
-    state: NEW,ESTABLISHED
+    ctstate: NEW,ESTABLISHED
     jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -470,8 +435,9 @@
     chain: OUTPUT
     protocol: udp
     match: state
-    state: NEW,ESTABLISHED
+    ctstate: NEW,ESTABLISHED
     jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -484,8 +450,54 @@
     chain: OUTPUT
     protocol: icmp
     match: state
-    state: NEW,ESTABLISHED
+    ctstate: NEW,ESTABLISHED
     jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    match: state
+    ctstate: ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: INPUT
+    protocol: udp
+    match: state
+    ctstate: ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.4
+
+- name: "SCORED | 3.6.4 | PATCH | Ensure outbound and established connections are configured"
+  iptables:
+    chain: INPUT
+    protocol: icmp
+    match: state
+    ctstate: ESTABLISHED
+    jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -498,8 +510,9 @@
     chain: OUTPUT
     protocol: tcp
     match: state
-    state: ESTABLISHED
+    ctstate: ESTABLISHED
     jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -512,8 +525,9 @@
     chain: OUTPUT
     protocol: udp
     match: state
-    state: ESTABLISHED
+    ctstate: ESTABLISHED
     jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -526,8 +540,9 @@
     chain: OUTPUT
     protocol: icmp
     match: state
-    state: ESTABLISHED
+    ctstate: ESTABLISHED
     jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -556,8 +571,9 @@
     protocol: tcp
     destination_port: 22
     match: state
-    state: NEW
+    ctstate: NEW,ESTABLISHED
     jump: ACCEPT
+    state: present
   changed_when: no
   when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
   tags:
@@ -565,6 +581,161 @@
       - patch
       - rule_3.6.5
       - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    source_port: 22
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    destination_port: 22
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    source_port: 22
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 68
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    source_port: 68
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    destination_port: 68
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.5 | PATCH | Ensure firewall rules exist for all open ports"
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    source_port: 68
+    match: state
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+    state: present
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.5
+      - notimplemented
+
+- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
+  # Set the policy for the INPUT chain to DROP
+  iptables:
+    chain: INPUT
+    policy: DROP
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.2
+
+- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
+  # Set the policy for the OUTPUT chain to DROP
+  iptables:
+    chain: OUTPUT
+    policy: DROP
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.2
+
+- name: "SCORED | 3.6.2 | PATCH | Ensure default deny firewall policy"
+  # Set the policy for the FORWARD chain to DROP
+  iptables:
+    chain: FORWARD
+    policy: DROP
+  changed_when: no
+  when: ubuntu1604cis_firewall == "iptables" and ubuntu1604cis_setup_firewall
+  tags:
+      - level1
+      - patch
+      - rule_3.6.2
 
 - name: "NOTSCORED | 3.7 | PATCH | Ensure wireless interfaces are disabled"
   command: /bin/true
@@ -608,32 +779,6 @@
     - section3.3.1
     - section3.3.1.2
 
-- name: 3.3.2.1 Set Boot Loader Password (check) (Scored)
-  command: grep "^password" /boot/grub/grub.cfg
-  register: boot_password
-  when: grub_cfg_file.stat.exists == True
-  changed_when: False
-  failed_when: False
-  always_run: True
-  tags:
-    - section3
-    - section3.3
-    - section3.3.2
-    - section3.3.2.1
-
-- name: 3.3.2.2 Set Boot Loader Password (Scored)
-  lineinfile: >
-    dest='/etc/grub.d/40_custom'
-    regexp='^password'
-    line="password_pbkdf2 root {{ grub_pass }}"
-    state=present
-  when: grub_cfg_file.stat.exists == True and boot_password.rc == 1
-  tags:
-    - section3
-    - section3.3
-    - section3.3.2
-    - section3.3.2.2
-
 - name: 3.3.3 Disable password protection booting (Scored)
   lineinfile: >
     dest='/etc/grub.d/10_linux'
@@ -663,3 +808,22 @@
     - section3
     - section3.3
     - section3.3.4
+
+- name: create directory for iptables rules
+  file: path=/etc/iptables state=directory owner=root group=root mode=0755
+
+- name: Save iptables
+  shell: "iptables-save > /etc/iptables/iptables.rules"
+
+- name: create flush iptables script
+  copy: dest=/etc/iptables/flush-iptables.sh src=flush-iptables.sh owner=root group=root mode=0755
+
+- name: create flush iptables script
+  copy: dest=/lib/systemd/system/iptables.service src=iptables.service owner=root group=root mode=0655
+
+- name: Make sure iptables is running
+  systemd:
+    state: started
+    name: iptables
+    enabled: yes
+    masked: no
